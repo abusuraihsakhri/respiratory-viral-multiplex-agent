@@ -1,7 +1,7 @@
 # Respiratory Viral Multiplex Agent
 
-> **Domain:** Infectious Disease Surveillance & Microbiology  
-> **Reference Guidelines & Standards:** `CLSI M100, EUCAST & CDC NHSN Clinical Standards`
+> **Domain:** Infectious Disease Surveillance & Microbiology
+> **Reference Guidelines & Standards:** CLSI M100, EUCAST & CDC NHSN Clinical Standards
 
 <div align="center">
 
@@ -16,89 +16,168 @@
 
 ---
 
-## 📖 What It Does
+## What It Does
 
-**Respiratory Viral Multiplex Agent** is an advanced analytical and computational platform implementing Syndromic Multiplex PCR & Hospital Cohorting Rules Engine.
-
----
-
-## ⚙️ Key Capabilities & Algorithmic Modules
-
-### 🔬 Core Algorithmic & Evaluation Engines
-
-- **`Severity`** — dedicated module for severity evaluation and state verification.
-- **`DomainKnowledgeRegistry`**: Enterprise domain rules, guideline matrices, and evidence benchmarks.
-- **`AgentAlert`** — dedicated module for agent alert evaluation and state verification.
-- **`TargetDeconvolutionAgent`**: Specialized Sub-Agent 1 for respiratory-viral-multiplex-agent
-- **`IsolationProtocolDispatcherAgent`**: Specialized Sub-Agent 2 for respiratory-viral-multiplex-agent
-- **`AntiviralWindowEvaluatorAgent`**: Specialized Sub-Agent 3 for respiratory-viral-multiplex-agent
+**Respiratory Viral Multiplex Agent** is an analytical and computational platform implementing Syndromic Multiplex PCR evaluation and Hospital Cohorting Rules Engine. It processes clinical metrics through specialized worker agents and produces consensus dossiers with tamper-evident audit trails.
 
 ---
 
-## 💻 CLI Quickstart & Usage
+## Key Capabilities
 
-### 1. Guided Interactive Mode
+### Core Algorithmic & Evaluation Engines
+
+- **Severity Evaluation** — dedicated module for severity evaluation and state verification.
+- **DomainKnowledgeRegistry** — enterprise domain rules, guideline matrices, and evidence benchmarks.
+- **AgentAlert** — dedicated module for agent alert evaluation and state verification.
+- **TargetDeconvolutionAgent** — primary metric & baseline quality auditor.
+- **IsolationProtocolDispatcherAgent** — STAT kinetics & closed-loop escalation auditor.
+- **AntiviralWindowEvaluatorAgent** — biomarker & concordance triager.
+
+### Security Features
+
+- **Zero-PHI Outbound Interceptor** — AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
+- **Tamper-Evident HMAC-SHA256 Audit Trail** — chained, cryptographically signed logs for every evaluation.
+- **Input Validation** — strict payload validation with bounds checking and PHI detection.
+
+---
+
+## Installation
+
 ```bash
-python cli.py
+# Clone the repository
+git clone https://github.com/abusuraihsakhri/respiratory-viral-multiplex-agent.git
+cd respiratory-viral-multiplex-agent
+
+# Install dependencies
+pip install fastapi uvicorn pydantic pytest
+
+# Optional: Set audit secret key (recommended for production)
+export AUDIT_SECRET_KEY="your-secure-random-key-here"
 ```
 
-### 2. Direct Parameterized Evaluation
+---
+
+## CLI Usage
+
+### 1. Single Task Evaluation
 ```bash
-python cli.py --task-id <value> --target <value> --primary <value> --secondary <value>
+python cli.py audit --task-id TASK-001 --target SPECIMEN-01 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
 ```
 
-### Parameter Reference
-- `--task-id`: Specifies input measurement or parameter value.
-- `--target`: Specifies input measurement or parameter value.
-- `--primary`: Specifies input measurement or parameter value.
-- `--secondary`: Specifies input measurement or parameter value.
-- `--critical`: Specifies input measurement or parameter value.
-- `--status`: Specifies input measurement or parameter value.
-- `--input`: Specifies input measurement or parameter value.
-- `--output`: Specifies input measurement or parameter value.
+### 2. Interactive Chat
+```bash
+python cli.py chat "What is the system status?"
+```
 
-### Input Data Schema
+### 3. Batch CSV Processing
+```bash
+python cli.py batch -i sample.csv -o results.csv
+```
 
-| Field | Description | Requirement |
-|:------|:------------|:------------|
-| `case_id` | Parameter / observation metric | Required |
-| `patient_synthetic_id` | Parameter / observation metric | Required |
-| `metric_primary` | Parameter / observation metric | Required |
-| `metric_secondary` | Parameter / observation metric | Required |
-| `is_stat` | Parameter / observation metric | Required |
-| `status_flag` | Parameter / observation metric | Required |
+### 4. Verify Audit Trail Integrity
+```bash
+python cli.py verify-audit
+```
+
+### 5. Launch REST API Server
+```bash
+python cli.py serve --host 127.0.0.1 --port 8000
+```
+
+### CLI Parameters
+
+| Parameter | Description | Default |
+|:----------|:------------|:--------|
+| `--task-id` | Unique task / case identifier | `TASK-2026-001` |
+| `--target` | Target: specimen, patient key, or genomic target | `KEY-TARGET-01` |
+| `--primary` | Primary metric measurement | `28.5` |
+| `--secondary` | Secondary metric / kinetic index | `14.2` |
+| `--critical` | Trigger emergency escalation / STAT flag | `False` |
+| `--status` | Status or phenotype descriptor | `DISCORDANT` |
 
 ---
 
-## 🛡️ Security & Enterprise Architecture
+## REST API Endpoints
 
-* **Zero-PHI Outbound Interceptor:** Active AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
-* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
-* **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights and monitoring Brier calibration drift.
-* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
+| Method | Endpoint | Description |
+|:-------|:---------|:------------|
+| `GET` | `/health` | Health check |
+| `GET` | `/metrics` | Prometheus-compatible metrics |
+| `POST` | `/api/audit` | Submit task for evaluation |
+| `POST` | `/api/chat` | Query supervisory chat |
+| `GET` | `/api/audit/logs` | Retrieve audit trail |
 
 ---
 
-## 🧪 Testing & Verification
-
-Run the automated test suite:
+## Testing
 
 ```bash
+# Run all tests
 pytest -v
-```
 
-Execute high-throughput batch simulation benchmarks:
-
-```bash
-python simulator.py --tasks 1000 --concurrency 8
+# Run specific test files
+pytest tests/ -v
+pytest test_resp_viral_sentinel.py -v
 ```
 
 ---
 
-## 🐳 Container Deployment
+## Container Deployment
 
 ```bash
+# Build and run with Docker
 docker build -t respiratory-viral-multiplex-agent .
-docker run -p 8000:8000 respiratory-viral-multiplex-agent
+docker run -p 8000:8000 -e AUDIT_SECRET_KEY=your-secret-key respiratory-viral-multiplex-agent
+
+# Or use docker-compose
+AUDIT_SECRET_KEY=your-secret-key docker-compose up
 ```
+
+---
+
+## Project Structure
+
+```
+respiratory-viral-multiplex-agent/
+├── agents/                          # Core agent modules
+│   ├── api.py                       # FastAPI REST server
+│   ├── base.py                      # Security, PHI guard, audit trail
+│   ├── models.py                    # Pydantic data models
+│   ├── supervisor.py                # Master orchestrator
+│   ├── workers.py                   # Specialized evaluation workers
+│   ├── llm_factory.py               # LLM provider factory
+│   ├── learning.py                  # Bayesian calibration engine
+│   ├── metrics.py                   # Prometheus metrics collector
+│   └── streamer.py                  # WebSocket telemetry
+├── respiratory_viral_multiplex_agent/
+│   ├── agents.py                    # Domain-specific sub-agents
+│   ├── engine.py                    # Clinical algorithmic engine
+│   ├── models.py                    # Clinical data models
+│   ├── server.py                    # FastAPI app factory
+│   └── cli.py                       # Alternative CLI entry point
+├── tests/                           # Test suite
+├── web/                             # Operations console (HTML)
+├── cli.py                           # Main CLI entry point
+├── enrichment.py                    # Enrichment feature engines
+├── simulator.py                     # High-throughput simulation
+├── sample.csv                       # Sample batch input
+├── sample_payload.json              # Sample API payload
+├── Dockerfile                       # Container build
+├── docker-compose.yml               # Container orchestration
+└── pyproject.toml                   # Project metadata
+```
+
+---
+
+## Security Notes
+
+- **Audit Secret Key**: Set the `AUDIT_SECRET_KEY` environment variable in production. Without it, an ephemeral key is generated at runtime (audit trail will not persist across restarts).
+- **PHI Guard**: All outbound data is inspected for PHI patterns. Payloads containing SSNs, MRNs, or patient identifiers are rejected.
+- **Input Validation**: API endpoints enforce strict bounds on numeric fields and string lengths.
+- **Path Traversal Protection**: Batch processing validates that input paths remain within the project directory.
+
+---
+
+## License
+
+MIT License. See [LICENSE](LICENSE) for details.
