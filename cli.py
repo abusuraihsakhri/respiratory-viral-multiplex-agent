@@ -133,7 +133,7 @@ def main(argv=None):
         with open(output_path, mode="w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=out_fields)
             writer.writeheader()
-            writer.writerows(out_rows)
+            writer.writerows({key: _safe_csv_cell(value) for key, value in row.items()} for row in out_rows)
         print(f"Processed {len(out_rows)} records -> {output_path}")
         return 0
 
