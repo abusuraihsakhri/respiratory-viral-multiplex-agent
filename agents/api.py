@@ -12,7 +12,7 @@ supervisor = SystemSupervisor(model_provider="mock")
 
 app = FastAPI(
     title="Respiratory Viral Multiplex Agent API",
-    description="Enterprise Distributed Component Platform (Antimicrobial Stewardship & Microbiology)",
+    description="Demonstration metric analysis; not validated medical decision support",
     version="3.0.0-ENTERPRISE",
 )
 
