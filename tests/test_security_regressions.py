@@ -56,3 +56,28 @@ def test_batch_rejects_missing_required_columns(tmp_path, monkeypatch):
     Path("input.csv").write_text("task_id\nTEST\n", encoding="utf-8")
     assert main(["batch", "-i", "input.csv", "-o", "output.csv"]) == 1
     assert not Path("output.csv").exists()
+
+
+def test_primary_batch_accepts_bundled_sample_schema(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    Path("sample.csv").write_text(
+        "case_id,patient_synthetic_id,metric_primary,metric_secondary,is_stat,status_flag\n"
+        "CASE-01,SYN-01,10,4,False,NORMAL\n", encoding="utf-8"
+    )
+    assert main(["batch", "-i", "sample.csv", "-o", "output.csv"]) == 0
+    with Path("output.csv").open(newline="", encoding="utf-8") as f:
+        row = next(csv.DictReader(f))
+    assert row["overall_urgency"] == "ROUTINE"
+
+
+def test_alternate_batch_false_flag_does_not_become_true(tmp_path):
+    from respiratory_viral_multiplex_agent.cli import main as alternate_main
+    source, target = tmp_path / "sample.csv", tmp_path / "result.csv"
+    source.write_text(
+        "case_id,patient_synthetic_id,metric_primary,metric_secondary,is_stat,status_flag\n"
+        "CASE-01,SYN-01,10,4,False,NORMAL\n", encoding="utf-8"
+    )
+    assert alternate_main(["batch", "-i", str(source), "-o", str(target)]) == 0
+    with target.open(newline="", encoding="utf-8") as f:
+        row = next(csv.DictReader(f))
+    assert row["stat_critical_alerts"] == "0"
