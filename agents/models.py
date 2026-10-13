@@ -1,7 +1,7 @@
 """
 Pydantic v2 schemas and data definitions for Respiratory Viral Multiplex Agent.
 Domain: Antimicrobial Stewardship & Microbiology
-Standard: CLSI M100 / EUCAST / CDC NHSN Guidelines
+Standard: Project-defined demonstration rules (not clinical guidance)
 """
 import datetime
 from enum import Enum
