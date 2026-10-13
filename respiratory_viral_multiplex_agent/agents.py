@@ -93,7 +93,7 @@ class RespViralCoordinator:
             "stat_critical_alerts": stat_count,
             "warning_alerts": warn_count,
             "alerts": [a.to_dict() for a in all_alerts],
-            "guideline_standard": "CDC & WHO Influenza / Viral Surveillance",
+            "guideline_standard": "Project-defined demonstration rules (not clinical guidance)",
             "consensus_summary": f"Multi-agent supervision completed across 3 sub-agents with status [{status.value}].",
         }
 
@@ -105,6 +105,6 @@ class RespViralCoordinator:
         if "status" in q or "summary" in q:
             return f"RespViral Sentinel: Syndromic Multiplex PCR & Hospital Cohorting Agent currently tracking {len(self.case_registry)} cases in on-premises memory."
         elif "guideline" in q or "standard" in q:
-            return "Active clinical surveillance operates under CDC & WHO Influenza / Viral Surveillance validated protocols."
+            return "Active clinical surveillance operates under Project-defined demonstration rules (not clinical guidance) demonstration logic; no clinical validation is implied."
         else:
-            return f"RespViral Sentinel: Syndromic Multiplex PCR & Hospital Cohorting Agent executive agent online. Zero-PHI air-gapped monitoring active."
+            return f"RespViral Sentinel: Syndromic Multiplex PCR & Hospital Cohorting Agent executive agent online. Local demonstration coordinator active; do not use identifiable patient data."
