@@ -29,3 +29,15 @@ jobs:
         run: python -m compileall -q agents respiratory_viral_multiplex_agent .
       - name: Run test suite
         run: python -m pytest -q
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check browser JavaScript syntax
+        run: node --check web/app.js
+      - name: Run browser parser tests
+        run: node --test tests/test_browser.cjs
