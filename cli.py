@@ -98,8 +98,8 @@ def main(argv=None):
                 reader = csv.DictReader(f)
                 fieldnames = list(reader.fieldnames or [])
                 rows = list(reader)
-                if not fieldnames or "primary_metric" not in fieldnames:
-                    raise ValueError("CSV must include a primary_metric column")
+                if not fieldnames or not {"primary_metric", "metric_primary"}.intersection(fieldnames):
+                    raise ValueError("CSV must include primary_metric or metric_primary")
         except (OSError, ValueError, csv.Error, UnicodeDecodeError) as e:
             print(f"Error reading CSV: {e}", file=sys.stderr)
             return 1
@@ -108,15 +108,15 @@ def main(argv=None):
         out_rows = []
         for r in rows:
             try:
-                flag_text = str(r.get("is_critical_flag", "")).strip().lower()
+                flag_text = str(r.get("is_critical_flag", r.get("is_stat", r.get("critical_flag", "")))).strip().lower()
                 if flag_text not in ("", "0", "1", "true", "false", "yes", "no"):
                     raise ValueError("Invalid is_critical_flag; expected true/false")
                 payload = SystemTaskPayload(
-                    task_id=r.get("task_id", "TASK-01"),
-                    target_identifier=r.get("target_identifier", "TARGET-01"),
-                    primary_metric=float(r.get("primary_metric", 15.0)),
-                    secondary_metric=float(r.get("secondary_metric", 5.0)),
-                    status_descriptor=r.get("status_descriptor", "NOMINAL"),
+                    task_id=r.get("task_id", r.get("case_id", "TASK-01")),
+                    target_identifier=r.get("target_identifier", r.get("patient_synthetic_id", "TARGET-01")),
+                    primary_metric=float(r.get("primary_metric", r.get("metric_primary", 15.0))),
+                    secondary_metric=float(r.get("secondary_metric", r.get("metric_secondary", 5.0))),
+                    status_descriptor=r.get("status_descriptor", r.get("status_flag", "NOMINAL")),
                     is_critical_flag=flag_text in ("true", "1", "yes"),
                 )
                 dossier = supervisor.process_task(payload)
