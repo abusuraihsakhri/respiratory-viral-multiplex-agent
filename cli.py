@@ -12,6 +12,13 @@ from agents.base import AuditLogger, SecurityException
 supervisor = SystemSupervisor(model_provider="mock")
 
 
+def _safe_csv_cell(value):
+    """Prevent imported text from becoming a spreadsheet formula on export."""
+    if isinstance(value, str) and value.lstrip().startswith(("=", "+", "-", "@")):
+        return "'" + value
+    return value
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="respiratory-viral-multiplex-agent", description="Respiratory Viral Multiplex Agent")
     subparsers = parser.add_subparsers(dest="command", required=True)
