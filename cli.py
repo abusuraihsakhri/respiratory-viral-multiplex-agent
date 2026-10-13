@@ -7,9 +7,16 @@ import json
 import sys
 from agents.models import SystemTaskPayload
 from agents.supervisor import SystemSupervisor
-from agents.base import AuditLogger
+from agents.base import AuditLogger, SecurityException
 
 supervisor = SystemSupervisor(model_provider="mock")
+
+
+def _safe_csv_cell(value):
+    """Prevent imported text from becoming a spreadsheet formula on export."""
+    if isinstance(value, str) and value.lstrip().startswith(("=", "+", "-", "@")):
+        return "'" + value
+    return value
 
 
 def main(argv=None):
@@ -85,8 +92,12 @@ def main(argv=None):
         output_path = Path(args.output).resolve()
         # Security: prevent path traversal outside working directory
         cwd = Path.cwd().resolve()
-        if not str(input_path).startswith(str(cwd)):
+        if not input_path.is_relative_to(cwd):
             print(f"Error: Input path must be within the project directory: {input_path}", file=sys.stderr)
+            return 1
+
+        if not output_path.is_relative_to(cwd):
+            print("Error: Output path must be within the project directory", file=sys.stderr)
             return 1
 
         try:
@@ -94,7 +105,9 @@ def main(argv=None):
                 reader = csv.DictReader(f)
                 fieldnames = list(reader.fieldnames or [])
                 rows = list(reader)
-        except (csv.Error, UnicodeDecodeError) as e:
+                if not fieldnames or not {"primary_metric", "metric_primary"}.intersection(fieldnames):
+                    raise ValueError("CSV must include primary_metric or metric_primary")
+        except (OSError, ValueError, csv.Error, UnicodeDecodeError) as e:
             print(f"Error reading CSV: {e}", file=sys.stderr)
             return 1
 
@@ -102,18 +115,21 @@ def main(argv=None):
         out_rows = []
         for r in rows:
             try:
+                flag_text = str(r.get("is_critical_flag", r.get("is_stat", r.get("critical_flag", "")))).strip().lower()
+                if flag_text not in ("", "0", "1", "true", "false", "yes", "no"):
+                    raise ValueError("Invalid is_critical_flag; expected true/false")
                 payload = SystemTaskPayload(
-                    task_id=r.get("task_id", "TASK-01"),
-                    target_identifier=r.get("target_identifier", "TARGET-01"),
-                    primary_metric=float(r.get("primary_metric", 15.0)),
-                    secondary_metric=float(r.get("secondary_metric", 5.0)),
-                    status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                    is_critical_flag=str(r.get("is_critical_flag", "")).lower() in ("true", "1", "yes"),
+                    task_id=r.get("task_id", r.get("case_id", "TASK-01")),
+                    target_identifier=r.get("target_identifier", r.get("patient_synthetic_id", "TARGET-01")),
+                    primary_metric=float(r.get("primary_metric", r.get("metric_primary", 15.0))),
+                    secondary_metric=float(r.get("secondary_metric", r.get("metric_secondary", 5.0))),
+                    status_descriptor=r.get("status_descriptor", r.get("status_flag", "NOMINAL")),
+                    is_critical_flag=flag_text in ("true", "1", "yes"),
                 )
-            except (ValueError, TypeError) as e:
-                print(f"Skipping malformed row: {e}", file=sys.stderr)
+                dossier = supervisor.process_task(payload)
+            except (ValueError, TypeError, SecurityException) as e:
+                print(f"Skipping malformed or disallowed row: {e}", file=sys.stderr)
                 continue
-            dossier = supervisor.process_task(payload)
             row_dict = dict(r)
             row_dict["overall_urgency"] = dossier.overall_urgency.value
             row_dict["integrity_status"] = dossier.integrity_status.value
@@ -124,7 +140,7 @@ def main(argv=None):
         with open(output_path, mode="w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=out_fields)
             writer.writeheader()
-            writer.writerows(out_rows)
+            writer.writerows({key: _safe_csv_cell(value) for key, value in row.items()} for row in out_rows)
         print(f"Processed {len(out_rows)} records -> {output_path}")
         return 0
 

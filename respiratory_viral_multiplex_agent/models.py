@@ -1,7 +1,7 @@
 """
 Clinical Data Models & Enums for RespViral Sentinel: Syndromic Multiplex PCR & Hospital Cohorting Agent.
 Domain: Virology
-Standard: CDC & WHO Influenza / Viral Surveillance
+Standard: Project-defined demonstration rules (not clinical guidance)
 """
 import datetime
 from dataclasses import dataclass, field
@@ -43,7 +43,7 @@ class AgentAlert:
     title: str
     clinical_finding: str
     actionable_recommendation: str
-    guideline_citation: str = "CDC & WHO Influenza / Viral Surveillance"
+    guideline_citation: str = "Project-defined demonstration rules (not clinical guidance)"
     timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:

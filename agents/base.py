@@ -1,5 +1,5 @@
 """
-Enterprise Security, PHI Outbound Guard, and HMAC-SHA256 Audit Trail.
+Pattern-based identifier screening and in-memory HMAC-SHA256 audit trail.
 
 """
 import os
@@ -25,7 +25,7 @@ PHI_PATTERNS = [
 
 
 class SecurityException(Exception):
-    """Raised when outbound data violates HIPAA Safe Harbor or contains raw PHI."""
+    """Raised when text matches a configured identifier pattern; screening is not de-identification."""
     pass
 
 
@@ -94,14 +94,25 @@ class AuditTrail:
         return entry
 
     def verify_integrity(self) -> bool:
-        for i, entry in enumerate(self.logs):
-            prev = self.logs[i-1]["current_hash"] if i > 0 else "GENESIS_BLOCK_0000000000000000"
-            if entry["prev_hash"] != prev:
+        """Verify every block's HMAC and its link to the preceding block."""
+        previous = "GENESIS_BLOCK_0000000000000000"
+        required = ("audit_id", "timestamp", "actor", "actor_tier",
+                    "event_type", "payload_hash", "prev_hash", "current_hash")
+        for entry in self.logs:
+            if any(not isinstance(entry.get(key), str) for key in required):
                 return False
+            if entry["prev_hash"] != previous:
+                return False
+            message = "|".join(entry[key] for key in required[:7])
+            expected = hmac.new(self.secret_key, message.encode("utf-8"), hashlib.sha256).hexdigest()
+            if not hmac.compare_digest(entry["current_hash"], expected):
+                return False
+            previous = entry["current_hash"]
         return True
 
     def get_trail(self) -> List[Dict[str, Any]]:
-        return self.logs
+        """Return a snapshot so callers cannot mutate the stored ledger."""
+        return [dict(entry) for entry in self.logs]
 
 
 GLOBAL_AUDIT = AuditTrail()
