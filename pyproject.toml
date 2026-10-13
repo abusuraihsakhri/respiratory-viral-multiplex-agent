@@ -7,15 +7,14 @@ name = "respiratory-viral-multiplex-engine"
 version = "2.0.1"
 description = "Respiratory multiplex analysis demonstration and research utilities"
 readme = "README.md"
-authors = [{ name = "Dr. Abu Suraih Sakhri", email = "abusuraih@example.com" }]
+authors = [{ name = "Dr. Abu Suraih Sakhri" }]
 license = "MIT"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Topic :: Scientific/Engineering :: Medical Science Apps.",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = ["pydantic>=2.6,<3"]
 
 [project.optional-dependencies]
