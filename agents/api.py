@@ -32,8 +32,8 @@ class AuditPayload(BaseModel):
     """Validated audit payload with strict string length limits."""
     task_id: str = Field(..., min_length=1, max_length=128)
     target_identifier: str = Field(..., min_length=1, max_length=128)
-    primary_metric: float = Field(..., ge=-1e6, le=1e6)
-    secondary_metric: float = Field(default=0.0, ge=-1e6, le=1e6)
+    primary_metric: float = Field(..., ge=-1e6, le=1e6, allow_inf_nan=False)
+    secondary_metric: float = Field(default=0.0, ge=-1e6, le=1e6, allow_inf_nan=False)
     status_descriptor: str = Field(default="NOMINAL", max_length=64)
     is_critical_flag: bool = False
 
@@ -49,7 +49,7 @@ class AuditPayload(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "HEALTHY", "service": "respiratory-viral-multiplex-agent", "domain": "Antimicrobial Stewardship & Microbiology", "standard": "CLSI M100 / EUCAST / CDC NHSN Guidelines", "version": "3.0.0-ENTERPRISE"}
+    return {"status": "HEALTHY", "service": "respiratory-viral-multiplex-agent", "domain": "Antimicrobial Stewardship & Microbiology", "standard": "Project-defined demonstration thresholds (not clinical guidance)", "version": "3.0.0-ENTERPRISE"}
 
 
 @app.get("/metrics")
@@ -92,8 +92,8 @@ def api_chat(req: ChatRequest):
     try:
         ans = supervisor.query_supervisory_chat(req.query)
         return {"response": ans}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except SecurityException:
+        raise HTTPException(status_code=400, detail="Query contains a disallowed identifier")
 
 
 @app.get("/api/audit/logs")
