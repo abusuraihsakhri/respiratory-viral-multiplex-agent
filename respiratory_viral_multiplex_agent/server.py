@@ -14,7 +14,7 @@ def create_app():
 
         app = FastAPI(
             title="RespViral Sentinel: Syndromic Multiplex PCR & Hospital Cohorting Agent",
-            description="Processes 20-target respiratory multiplex PCR panels (Influenza A/B, RSV, SARS-CoV-2, Metapneumovirus) and outputs hospital isolation/cohorting rules.",
+            description="Demonstrates synthetic metric-based rules; not an assay-validated interpretation or isolation/cohorting service.",
             version="2.0.0-PRO",
         )
 
