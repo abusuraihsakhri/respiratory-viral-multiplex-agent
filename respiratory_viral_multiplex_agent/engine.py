@@ -1,7 +1,7 @@
 """
 Clinical Algorithmic Engine & Guideline Rules for RespViral Sentinel: Syndromic Multiplex PCR & Hospital Cohorting Agent.
 Domain: Virology
-Standard: CDC & WHO Influenza / Viral Surveillance
+Standard: Project-defined demonstration rules (not clinical guidance)
 """
 import math
 from typing import Dict, Any, List, Optional
@@ -9,7 +9,7 @@ from .models import ClinicalCasePayload, AgentAlert, UrgencyLevel, ClinicalInteg
 
 
 class ClinicalDomainEngine:
-    GUIDELINE = "CDC & WHO Influenza / Viral Surveillance"
+    GUIDELINE = "Project-defined demonstration rules (not clinical guidance)"
     PRIMARY_BASELINE_LIMIT = 20.0
     SECONDARY_ALERT_LIMIT = 10.0
 
@@ -18,8 +18,8 @@ class ClinicalDomainEngine:
         if value > cls.PRIMARY_BASELINE_LIMIT:
             return {
                 "title": "Primary Metric Threshold Exceeded",
-                "finding": f"Observed value ({value:.2f}) exceeds CDC & WHO Influenza / Viral Surveillance clinical baseline limit ({cls.PRIMARY_BASELINE_LIMIT:.1f}).",
-                "recommendation": "Perform immediate secondary verification and calibration review.",
+                "finding": f"Observed value ({value:.2f}) exceeds Project-defined demonstration rules (not clinical guidance) demonstration limit ({cls.PRIMARY_BASELINE_LIMIT:.1f}).",
+                "recommendation": "Review the data against assay-specific validation documents.",
             }
         return None
 
@@ -29,7 +29,7 @@ class ClinicalDomainEngine:
             return {
                 "title": "STAT Kinetic Escalation Triggered",
                 "finding": f"Kinetic parameter ({value:.2f}) with STAT={is_stat} requires prioritized supervision.",
-                "recommendation": "Activate closed-loop verbal clinician notification protocol per Joint Commission standards.",
+                "recommendation": "Review the priority flag and follow locally approved procedures if applicable.",
             }
         return None
 
@@ -40,6 +40,6 @@ class ClinicalDomainEngine:
             return {
                 "title": "Phenotypic / Biomarker Discordance Identified",
                 "finding": f"Status flag '{status_flag}' indicates divergence from standard diagnostic concordance.",
-                "recommendation": f"Order reflex confirmatory testing per CDC & WHO Influenza / Viral Surveillance clinical recommendations.",
+                "recommendation": f"Review the original laboratory report and manufacturer guidance; no automatic reflex testing is indicated.",
             }
         return None
