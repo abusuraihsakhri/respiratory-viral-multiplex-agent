@@ -81,3 +81,15 @@ def test_alternate_batch_false_flag_does_not_become_true(tmp_path):
     with target.open(newline="", encoding="utf-8") as f:
         row = next(csv.DictReader(f))
     assert row["stat_critical_alerts"] == "0"
+
+
+def test_batch_neutralizes_spreadsheet_formula(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    Path("input.csv").write_text(
+        "task_id,target_identifier,primary_metric\n"
+        '"=SUM(1+1)",SYN-01,10\n', encoding="utf-8"
+    )
+    assert main(["batch", "-i", "input.csv", "-o", "output.csv"]) == 0
+    with Path("output.csv").open(newline="", encoding="utf-8") as f:
+        row = next(csv.DictReader(f))
+    assert row["task_id"] == "'=SUM(1+1)"
