@@ -54,7 +54,7 @@ python cli.py verify-audit
 python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
-CSV batch processing requires `primary_metric` and permits optional task, target, secondary metric, descriptor, and true/false priority columns. Malformed or disallowed rows are skipped with a warning. Batch input and output must remain within the current working directory.
+CSV batch processing accepts `primary_metric` or the bundled sample's `metric_primary` column, with optional IDs, secondary metrics, descriptor, and true/false priority columns. Exported text that could be interpreted as a spreadsheet formula is prefixed with an apostrophe. Malformed or disallowed rows are skipped with a warning. Batch input and output must remain within the current working directory.
 
 The alternate installed console script is `respiratory-viral-multiplex-engine`. The FastAPI service provides `GET /health`, `GET /metrics`, `POST /api/audit`, `POST /api/chat`, and `GET /api/audit/logs`.
 
